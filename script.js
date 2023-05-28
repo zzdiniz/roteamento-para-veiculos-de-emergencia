@@ -1,28 +1,11 @@
-function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const raioTerra = 6371; // Raio médio da Terra em quilômetros
-  
-    // Converter as coordenadas de graus decimais para radianos
-    const toRadians = (graus) => graus * (Math.PI / 180);
-    const pi1 = toRadians(lat1);
-    const pi2 = toRadians(lat2);
-    const deltaLatitude = toRadians(lat2 - lat1);
-    const deltaLongitude = toRadians(lon2 - lon1);
-  
-    // Calcular a fórmula de Haversine
-    const a = Math.sin(deltaLatitude / 2) * Math.sin(deltaLatitude / 2) +
-              Math.cos(pi1) * Math.cos(pi2) *
-              Math.sin(deltaLongitude / 2) * Math.sin(deltaLongitude / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distancia = raioTerra * c;
-  
-    return distancia;
-  }
+
+  //classe que representa os nós/estados
   class Node {
     constructor(latitude,longitude,nome,vizinhos){
         this.nome = nome
         this.latitude = parseFloat(latitude)
         this.longitude = parseFloat(longitude)
-        this.vizinhos = vizinhos
+        this.vizinhos = vizinhos  //"vizinhos" representa os nós adjacentes a serem expandidos pelo algoritmo
     }
   }
   
@@ -39,7 +22,7 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
     new Node(-22.891315799764275, -47.09006437871278, "Pedreira"),
     new Node(-22.881522172128353, -47.08568858959913, "Círculo"),
     new Node(-22.85819780851976, -47.04468177610827, "CPFL"),
-    new Node(-22.847123476277876, -47.062831262616626, "domPedro", ["DesatadoraDosNós","Lagoa"]),
+    new Node(-22.847123476277876, -47.062831262616626, "domPedro"),
     new Node(-22.832758349629568, -47.052103137485176, "PUCI"),
     new Node(-22.898436795524063, -47.020136004942586, "Sociedade"),
     new Node(-22.901556499840755, -47.060304364466326, "Basílica"),
@@ -68,11 +51,72 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
     new Node(-23.00796797068489, -47.137568504938, "Viracopos"),
     new Node(-22.88737624361771, -47.079834533779035, "ClubeBonfim")
   ];
-  
-  /*const value = calcularDistancia(domPedro.latitude, domPedro.longitude, Viracopos.latitude, Viracopos.longitude)
-  //toFixed(NcasasDecimais)
-  console.log(`A distância entre os dois pontos é de aproximadamente ${value.toFixed(2)} km.`)
 
-  const distancia = document.getElementById("distancia")
-  distancia.innerText=value.toFixed(2)*/
+  const objetivo = new Node(-22.930333163037247, -47.057006824740775,"hospital",null) //nó objetivo ->hospital Sta Edwiges
+
+
+  //declarando os visinhos de cada nó
+  nodes[0].vizinhos = [nodes[15]]//Mercadão
+  nodes[1].vizinhos = [nodes[23],nodes[39]]//Torre do Castelo
+  nodes[2].vizinhos = [nodes[26],nodes[14]]//Iguatemi
+  nodes[3].vizinhos = [nodes[4],nodes[7]]//Bosque dos Jequitibás
+  nodes[4].vizinhos = [nodes[3],nodes[16]]//Estádio Brinco de Ouro da Princesa
+  nodes[5].vizinhos = [nodes[34],nodes[21],nodes[17]]//Unimart
+  nodes[6].vizinhos = [nodes[12],nodes[11],nodes[7]]//Taquaral
+  nodes[7].vizinhos = [nodes[6],nodes[15],nodes[19],nodes[3]]//Prefeitura
+  nodes[8].vizinhos = [nodes[18],nodes[36]]//Rodoviária
+  nodes[9].vizinhos = [nodes[10],nodes[33]]//Pedreira Chapadão
+  nodes[10].vizinhos = [nodes[30],nodes[39],nodes[9]]//Círculo Militar
+  nodes[11].vizinhos = [nodes[13],nodes[6],nodes[26]]//CPFL
+  nodes[12].vizinhos = [nodes[13],nodes[30],nodes[6]]//Shopping D Pedro
+  nodes[13].vizinhos = [nodes[11],nodes[12]]//PUC I
+  nodes[14].vizinhos = [nodes[2]]//Hípica
+  nodes[15].vizinhos = [nodes[0],nodes[7]]//Basílica
+  nodes[16].vizinhos = [nodes[4],nodes[35],objetivo]//Unip
+  nodes[17].vizinhos = [nodes[5],nodes[37],nodes[25],objetivo]//Campinas Shopping
+  nodes[18].vizinhos = [nodes[8]]//Estação Cultura
+  nodes[19].vizinhos = [nodes[7],nodes[27]]//Jockey Club
+  nodes[20].vizinhos = [nodes[27],nodes[29]]//Catedral Metropolitana
+  nodes[21].vizinhos = [nodes[5],nodes[22]]//Shopping Bandeiras
+  nodes[22].vizinhos = [nodes[21]]//Havan
+  nodes[23].vizinhos = [nodes[1],nodes[36]]//Catedral Transurc
+  nodes[24].vizinhos = [nodes[38],nodes[37]]//SESI
+  nodes[25].vizinhos = [nodes[17]]//Parque das águas
+  nodes[26].vizinhos = [nodes[11],nodes[28],nodes[2]]//Galleria Shopping
+  nodes[27].vizinhos = [nodes[19],nodes[20]]//Largo do Rosário
+  nodes[28].vizinhos = [nodes[26]]//Decathlon
+  nodes[29].vizinhos = [nodes[20],objetivo]//Estádio Moisés Lucarelli
+  nodes[30].vizinhos = [nodes[12],nodes[31],nodes[10]]//Desatadora dos nós
+  nodes[31].vizinhos = [nodes[30]]//Hotel Premium
+  nodes[32].vizinhos = [nodes[35]]//Parque Hermantino
+  nodes[33].vizinhos = [nodes[34],nodes[9]]//Clube Bosch
+  nodes[34].vizinhos = [nodes[33],nodes[5]]//Leroy Merlin
+  nodes[35].vizinhos = [nodes[16],nodes[32]]//Barão de Campinas
+  nodes[36].vizinhos = [nodes[8],nodes[23]]//Sesc
+  nodes[37].vizinhos = [nodes[24],nodes[17]]//Centro Olimpico
+  nodes[38].vizinhos = [nodes[24]]//Viracopos
+  nodes[39].vizinhos = [nodes[1],nodes[10]]//Clube Bonfim
+
+
+  function calcularDistancia(latitude, longitude) {//função heurística "h(n)", usada para compor a função de avaliação
+    const raioTerra = 6371; // Raio médio da Terra em quilômetros
+    const latitude2 = objetivo.latitude;
+    const longitude2 = objetivo.longitude;
+    // Converter as coordenadas de graus decimais para radianos
+    const toRadians = (graus) => graus * (Math.PI / 180);
+    const pi1 = toRadians(latitude);
+    const pi2 = toRadians(latitude2);
+    const deltaLatitude = toRadians(latitude2 - latitude);
+    const deltaLongitude = toRadians(longitude2 - longitude);
+  
+    // Calcular a fórmula de Haversine
+    const a = Math.sin(deltaLatitude / 2) * Math.sin(deltaLatitude / 2) +
+              Math.cos(pi1) * Math.cos(pi2) *
+              Math.sin(deltaLongitude / 2) * Math.sin(deltaLongitude / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distancia = raioTerra * c;
+  
+    return distancia;
+  }
+
   console.log(nodes)
