@@ -1,12 +1,13 @@
 
   //classe que representa os nós/estados
   class Node {
-    constructor(latitude,longitude,nome,vizinhos){
+    constructor(latitude,longitude,nome,vizinhos,custo){
         this.nome = nome
         this.latitude = parseFloat(latitude)
         this.longitude = parseFloat(longitude)
         this.vizinhos = vizinhos  //"vizinhos" representa os nós adjacentes a serem expandidos pelo algoritmo
-    }
+        this.custo = {}   // armazena os custos para os nós vizinhos
+      }
   }
   
   const nodes = [
@@ -55,47 +56,169 @@
   const objetivo = new Node(-22.930333163037247, -47.057006824740775,"hospital",null) //nó objetivo ->hospital Sta Edwiges
 
 
-  //declarando os visinhos de cada nó
+  //declarando os vizinhos de cada nó e seus respectivos custos
   nodes[0].vizinhos = [nodes[15]]//Mercadão
+    nodes[0].custo[nodes[15].nome] = 0.7 //Mercadão -> Basílica
+
   nodes[1].vizinhos = [nodes[23],nodes[39]]//Torre do Castelo
+    nodes[1].custo[nodes[23].nome] = 1.9 //Torre -> Transurc
+    nodes[1].custo[nodes[39].nome] = 0.5 //Torre -> Clube Bonfim
+
   nodes[2].vizinhos = [nodes[26],nodes[14]]//Iguatemi
+    nodes[2].custo[nodes[26].nome] = 5.9 //Iguatemi -> Galleria
+    nodes[2].custo[nodes[14].nome] = 2.9 //Iguatemi -> Hipica
+
   nodes[3].vizinhos = [nodes[4],nodes[7]]//Bosque dos Jequitibás
+    nodes[3].custo[nodes[4].nome] = 1.4 //Bosque -> Estádio Brinco de Ouro
+    nodes[3].custo[nodes[7].nome] = 2.2 //Bosque -> Prefeitura
+  
   nodes[4].vizinhos = [nodes[3],nodes[16]]//Estádio Brinco de Ouro da Princesa
+    nodes[4].custo[nodes[3].nome] = 1.4 //Estádio Brinco de Ouro -> Bosque
+    nodes[4].custo[nodes[16].nome] = 3.0 //Estádio Brinco de Ouro -> UNIP
+  
   nodes[5].vizinhos = [nodes[34],nodes[21],nodes[17]]//Unimart
+    nodes[5].custo[nodes[34].nome] = 3.0 //Unimart -> Leroy
+    nodes[5].custo[nodes[21].nome] = 4.4 //Unimart -> Bandeiras
+    nodes[5].custo[nodes[17].nome] = 5.6 //Unimart -> Campinas Shopping
+  
   nodes[6].vizinhos = [nodes[12],nodes[11],nodes[7]]//Taquaral
+    nodes[6].custo[nodes[12].nome] = 5.0 //Taquaral -> Dom Pedro
+    nodes[6].custo[nodes[11].nome] = 2.1 //Taquaral -> CPFL
+    nodes[6].custo[nodes[7].nome] = 4.1 //Taquaral -> Prefeitura
+  
   nodes[7].vizinhos = [nodes[6],nodes[15],nodes[19],nodes[3]]//Prefeitura
+    nodes[7].custo[nodes[6].nome] = 4.1 //Prefeitura -> Taquaral
+    nodes[7].custo[nodes[15].nome] = 1.3 //Prefeitura -> Basílica
+    nodes[7].custo[nodes[19].nome] = 1.2 //Prefeitura -> Jockey Club
+    nodes[7].custo[nodes[3].nome] = 2.2 //Prefeitura -> Bosque
+
   nodes[8].vizinhos = [nodes[18],nodes[36]]//Rodoviária
+    nodes[8].custo[nodes[18].nome] = 2.7 //Rodoviária -> Estação Cultura
+    nodes[8].custo[nodes[36].nome] = 1.4 //Rodoviária -> Sesc
+  
   nodes[9].vizinhos = [nodes[10],nodes[33]]//Pedreira Chapadão
+    nodes[9].custo[nodes[10].nome] = 2.0 //Pedreira -> Circulo Militar
+    nodes[9].custo[nodes[33].nome] = 3.5 //Pedreira -> Clube Bosch
+  
   nodes[10].vizinhos = [nodes[30],nodes[39],nodes[9]]//Círculo Militar
+    nodes[10].custo[nodes[30].nome] = 6.5 //Circulo Militar -> Santuário
+    nodes[10].custo[nodes[39].nome] = 1.1 //Circulo Militar -> Clube Bonfim
+    nodes[10].custo[nodes[9].nome] = 2.0 //Circulo Militar -> Pedreira
+
   nodes[11].vizinhos = [nodes[13],nodes[6],nodes[26]]//CPFL
+    nodes[11].custo[nodes[13].nome] = 4.2 //CPFL -> PUC I
+    nodes[11].custo[nodes[6].nome] = 2.1 //CPFL -> Taquaral
+    nodes[11].custo[nodes[26].nome] = 5.5 //CPFL -> Galleria
+
   nodes[12].vizinhos = [nodes[13],nodes[30],nodes[6]]//Shopping D Pedro
+    nodes[12].custo[nodes[13].nome] = 4.2 //D Pedro -> PUC I
+    nodes[12].custo[nodes[30].nome] = 2.3 //D Pedro -> Santuário
+    nodes[12].custo[nodes[6].nome] = 5.0 //D Pedro -> Taquaral
+  
   nodes[13].vizinhos = [nodes[11],nodes[12]]//PUC I
+    nodes[13].custo[nodes[11].nome] = 4.2 //PUC I -> CPFL
+    nodes[13].custo[nodes[12].nome] = 4.2 //PUC I -> D Pedro
+  
   nodes[14].vizinhos = [nodes[2]]//Hípica
+    nodes[14].custo[nodes[2].nome] = 2.9 //Hipica -> Iguatemi
+
   nodes[15].vizinhos = [nodes[0],nodes[7]]//Basílica
+    nodes[15].custo[nodes[0].nome] = 0.7 //Basílica -> Mercado
+    nodes[15].custo[nodes[7].nome] = 1.3 //Basílica -> Prefeitura
+
   nodes[16].vizinhos = [nodes[4],nodes[35],objetivo]//Unip
+    nodes[16].custo[nodes[4].nome] = 3.0 //Unip -> Estádio Brinco de Ouro
+    nodes[16].custo[nodes[35].nome] = 2.7 //Unip -> Praça Barão
+    nodes[16].custo[objetivo.nome] = 4.0 //Unip -> Hospital
+  
   nodes[17].vizinhos = [nodes[5],nodes[37],nodes[25],objetivo]//Campinas Shopping
+    nodes[17].custo[nodes[5].nome] = 5.6 //Campinas Shopping -> Unimart
+    nodes[17].custo[nodes[37].nome] = 7.3 //Campinas Shopping -> Centro Olímpico
+    nodes[17].custo[nodes[25].nome] = 7.4 //Campinas Shopping -> Parque das Águas
+    nodes[17].custo[objetivo.nome] = 5.3 //Campinas Shopping -> Hospital
+
   nodes[18].vizinhos = [nodes[8]]//Estação Cultura
+    nodes[18].custo[nodes[8].nome] = 2.7 //Estação Cultura -> Terminal
+
   nodes[19].vizinhos = [nodes[7],nodes[27]]//Jockey Club
+    nodes[19].custo[nodes[7].nome] = 1.2 //Jockey Club -> Prefeitura
+    nodes[19].custo[nodes[27].nome] = 0.3 //Jockey Club -> Largo do Rosário
+  
   nodes[20].vizinhos = [nodes[27],nodes[29]]//Catedral Metropolitana
+    nodes[20].custo[nodes[27].nome] = 0.4 //Catedral -> Largo do Rosário
+    nodes[20].custo[nodes[29].nome] = 1.7 //Catedral -> Estádio Moisés Lucarelli
+
   nodes[21].vizinhos = [nodes[5],nodes[22]]//Shopping Bandeiras
+    nodes[21].custo[nodes[5].nome] = 4.4 //Bandeiras -> Unimart
+    nodes[21].custo[nodes[22].nome] = 4.6 //Bandeiras -> Havan
+  
   nodes[22].vizinhos = [nodes[21]]//Havan
-  nodes[23].vizinhos = [nodes[1],nodes[36]]//Catedral Transurc
+    nodes[22].custo[nodes[21].nome] = 4.6 //Havan -> Bandeiras
+
+  nodes[23].vizinhos = [nodes[1],nodes[36]]//Transurc
+    nodes[23].custo[nodes[1].nome] = 1.9 //Transurc -> Torre
+    nodes[23].custo[nodes[36].nome] = 1.5 //Transurc -> Sesc
+  
   nodes[24].vizinhos = [nodes[38],nodes[37]]//SESI
+    nodes[24].custo[nodes[38].nome] = 9.1 //SESI -> Aeroporto
+    nodes[24].custo[nodes[37].nome] = 5.2 //SESI -> Centro Olímpico
+
   nodes[25].vizinhos = [nodes[17]]//Parque das águas
+    nodes[25].custo[nodes[17].nome] = 7.4 //Parque das Águas -> Campinas Shopping
+
   nodes[26].vizinhos = [nodes[11],nodes[28],nodes[2]]//Galleria Shopping
+    nodes[26].custo[nodes[11].nome] = 5.5 //Galleria -> CPFL
+    nodes[26].custo[nodes[28].nome] = 4.5 //Galleria -> Decathlon
+    nodes[26].custo[nodes[2].nome] = 5.9 //Galleria -> Iguatemi
+    
   nodes[27].vizinhos = [nodes[19],nodes[20]]//Largo do Rosário
+    nodes[27].custo[nodes[19].nome] = 0.3 //Largo do Rosário -> Jockey Club
+    nodes[27].custo[nodes[20].nome] = 0.4 //Largo do Rosário -> Catedral
+
   nodes[28].vizinhos = [nodes[26]]//Decathlon
+    nodes[28].custo[nodes[26].nome] = 4.5 //Decathlon -> Galleria
+
   nodes[29].vizinhos = [nodes[20],objetivo]//Estádio Moisés Lucarelli
-  nodes[30].vizinhos = [nodes[12],nodes[31],nodes[10]]//Desatadora dos nós
+    nodes[29].custo[nodes[20].nome] = 1.7 //Estádio Moisés Lucarelli -> Catedral
+    nodes[29].custo[objetivo.nome] = 3.6 //Estádio Moisés Lucarelli -> Hospital
+
+  nodes[30].vizinhos = [nodes[12],nodes[31],nodes[10]]//Santuário Desatadora dos nós
+    nodes[30].custo[nodes[12].nome] = 2.3 //Santuário -> D Pedro
+    nodes[30].custo[nodes[31].nome] = 9.4 //Santuário -> Hotel Premium
+    nodes[30].custo[nodes[10].nome] = 6.5 //Santuário -> Círculo Militar
+
   nodes[31].vizinhos = [nodes[30]]//Hotel Premium
+    nodes[31].custo[nodes[30].nome] = 9.4 //Hotel -> Santuário
+
   nodes[32].vizinhos = [nodes[35]]//Parque Hermantino
+    nodes[32].custo[nodes[35].nome] = 1.0 //Parque Hermantino -> Praça Barão 
+
   nodes[33].vizinhos = [nodes[34],nodes[9]]//Clube Bosch
+    nodes[33].custo[nodes[34].nome] = 2.1 //Bosch -> Leroy Merlin
+    nodes[33].custo[nodes[9].nome] = 3.5 //Bosch -> Pedreira
+
   nodes[34].vizinhos = [nodes[33],nodes[5]]//Leroy Merlin
+    nodes[34].custo[nodes[33].nome] = 2.1 //Leroy -> Clube Bosch
+    nodes[34].custo[nodes[5].nome] = 3.0 //Leroy -> Unimart
+
   nodes[35].vizinhos = [nodes[16],nodes[32]]//Barão de Campinas
+    nodes[35].custo[nodes[16].nome] = 2.7 //Barão -> Unip
+    nodes[35].custo[nodes[32].nome] = 1.0 //Barão -> Parque Hermantino
+
   nodes[36].vizinhos = [nodes[8],nodes[23]]//Sesc
+    nodes[36].custo[nodes[8].nome] = 1.4 //Sesc -> Terminal
+    nodes[36].custo[nodes[23].nome] = 1.5 //Sesc -> Transurc
+
   nodes[37].vizinhos = [nodes[24],nodes[17]]//Centro Olimpico
+    nodes[37].custo[nodes[24].nome] = 5.2 //Centro Olímpico -> SESI
+    nodes[37].custo[nodes[17].nome] = 7.3 //Centro Olímpico -> Campinas Shopping
+
   nodes[38].vizinhos = [nodes[24]]//Viracopos
+    nodes[38].custo[nodes[24].nome] = 9.1 //Viracopos -> SESI 
+
   nodes[39].vizinhos = [nodes[1],nodes[10]]//Clube Bonfim
+    nodes[39].custo[nodes[1].nome] = 0.5 //Bonfim -> Torre
+    nodes[39].custo[nodes[10].nome] = 1.1 //Bonfim -> Círculo Militar
 
 
   function calcularDistancia(latitude, longitude) {//função heurística "h(n)", usada para compor a função de avaliação
