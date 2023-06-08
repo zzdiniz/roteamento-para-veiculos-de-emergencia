@@ -221,8 +221,10 @@
     nodes[39].custo[nodes[10].nome] = 1.1 //Bonfim -> Círculo Militar
 
 
-  function calcularDistancia(latitude, longitude) {//função heurística "h(n)", usada para compor a função de avaliação
+  function calcularDistancia(initialNode, objetivo) {//função heurística "h(n)", usada para compor a função de avaliação
     const raioTerra = 6371; // Raio médio da Terra em quilômetros
+    const latitude = initialNode.latitude;
+    const longitude = initialNode.longitude;
     const latitude2 = objetivo.latitude;
     const longitude2 = objetivo.longitude;
     // Converter as coordenadas de graus decimais para radianos
@@ -243,3 +245,75 @@
   }
 
   console.log(nodes)
+
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  function convertToAllNodes(nodes) {
+    const allNodes = {};
+  
+    for (const node of nodes) {
+      allNodes[node.nome] = {
+        vizinhos: node.vizinhos,
+        // outras informações do nó, se necessário
+      };
+    }
+  
+    return allNodes;
+  }
+
+  function estrela(startNode, goalNode, allNodes) {
+    const openList = []; // lista aberta
+    const closedList = new Set(); // lista fechada (conjunto para busca mais eficiente)
+    const gScore = {}; // custo acumulado do nó inicial até o nó atual
+    const fScore = {}; // custo total estimado do nó inicial até o objetivo, passando pelo nó atual
+    const cameFrom = {}; // mapa de nós visitados, usado para reconstruir o caminho final
+  
+    // Inicialização
+    gScore[startNode.nome] = 0;
+    fScore[startNode.nome] = calcularDistancia(startNode, goalNode);
+    openList.push(startNode);
+  
+    while (openList.length > 0) {
+      console.log("lista de abertos ->",openList);
+      console.log("lista de fechados ->", closedList)
+      // Encontrar o nó com o menor valor fScore na lista aberta
+      openList.sort((a, b) => fScore[a.nome] - fScore[b.nome]);
+      let currentNode = openList.shift();
+  
+      if (currentNode === goalNode) {
+        // Caminho encontrado, reconstruir o caminho percorrendo os nós visitados
+        const path = [currentNode];
+        while (cameFrom[currentNode.nome]) {
+          currentNode = cameFrom[currentNode.nome];
+          path.unshift(currentNode);
+        }
+        return path;
+      }
+  
+      closedList.add(currentNode);
+  
+      // Expande apenas os vizinhos dos nós já presentes na lista de todos os nós possíveis
+      for (const neighbor of allNodes[currentNode.nome].vizinhos) {
+        if (closedList.has(neighbor)) {
+          continue; // Ignorar nós já visitados
+        }
+  
+        const tentativeGScore = gScore[currentNode.nome] + currentNode.custo[neighbor.nome];
+  
+        if (!openList.includes(neighbor)) {
+          openList.push(neighbor); // Adicionar vizinho à lista aberta se não estiver lá
+        } else if (tentativeGScore >= gScore[neighbor.nome]) {
+          continue; // Não é um caminho melhor
+        }
+        // Caminho melhor encontrado
+        cameFrom[neighbor.nome] = currentNode;
+        gScore[neighbor.nome] = tentativeGScore;
+        fScore[neighbor.nome] = gScore[neighbor.nome] + calcularDistancia(neighbor, goalNode);
+      }
+    }
+  
+    return null; // Caminho não encontrado
+  }
+
+  const allNodes = convertToAllNodes(nodes)
+  const resultado = estrela(nodes[13],nodes[19],allNodes);
+  console.log("resultado ->", resultado)
