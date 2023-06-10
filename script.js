@@ -7,6 +7,7 @@
         this.longitude = parseFloat(longitude)
         this.vizinhos = vizinhos  //"vizinhos" representa os nós adjacentes a serem expandidos pelo algoritmo
         this.custo = {}   // armazena os custos para os nós vizinhos
+        this.pai = null;
       }
   }
   
@@ -220,7 +221,6 @@
     nodes[39].custo[nodes[1].nome] = 0.5 //Bonfim -> Torre
     nodes[39].custo[nodes[10].nome] = 1.1 //Bonfim -> Círculo Militar
 
-
   function calcularDistancia(initialNode, objetivo) {//função heurística "h(n)", usada para compor a função de avaliação
     const raioTerra = 6371; // Raio médio da Terra em quilômetros
     const latitude = initialNode.latitude;
@@ -245,7 +245,37 @@
   }
 
   console.log(nodes)
-
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  function buildTree(nodeName,nodeFather,nodeCost){
+    const node = document.createElement('div')
+    const nameCell = document.createElement('div')
+    const fatherCell = document.createElement('div')
+    const costCell = document.createElement('div')
+    nameCell.innerText = `${nodeName}`
+    fatherCell.innerText = `${nodeFather}`
+    costCell.innerText = `${nodeCost}`
+    node.className = "node"
+    node.appendChild(nameCell)
+    node.appendChild(fatherCell)
+    node.appendChild(costCell)
+    if(nodeFather == null){
+      node.setAttribute('id',`${nodeName}`)
+      //node.innerText = `${nodeName} | - | ${nodeCost}`
+      document.getElementById("tree").appendChild(node)
+      const placeHolder = document.createElement('div')
+      placeHolder.setAttribute('id',`placeHolder${nodeName}`)
+      node.insertAdjacentElement("afterend", placeHolder);
+    }
+    else{
+      node.setAttribute('id',`${nodeName}`)
+      const fatherPlaceHolder = document.getElementById(`placeHolder${nodeFather}`)
+      fatherPlaceHolder.appendChild(node)
+      const nodePlaceHolder = document.createElement('div')
+      nodePlaceHolder.setAttribute('id',`placeHolder${nodeName}`)
+      nodePlaceHolder.setAttribute('class',`placeHolder`)
+      node.insertAdjacentElement("afterend", nodePlaceHolder);
+    }
+  }
   //////////////////////////////////////////////////////////////////////////////////////////////
   function convertToAllNodes(nodes) {
     const allNodes = {};
@@ -266,15 +296,17 @@
     const gScore = {}; // custo acumulado do nó inicial até o nó atual
     const fScore = {}; // custo total estimado do nó inicial até o objetivo, passando pelo nó atual
     const cameFrom = {}; // mapa de nós visitados, usado para reconstruir o caminho final
-  
+    const outputOpenList = []
+    const outputClosedList = []
     // Inicialização
+    buildTree(startNode.nome,startNode.pai,startNode.custo)
     gScore[startNode.nome] = 0;
     fScore[startNode.nome] = calcularDistancia(startNode, goalNode);
     openList.push(startNode);
-  
+    outputOpenList.push(startNode.nome)
     while (openList.length > 0) {
-      console.log("lista de abertos ->",openList);
-      console.log("lista de fechados ->", closedList)
+      console.log("lista de abertos ->",outputOpenList);
+      console.log("lista de fechados ->",outputClosedList);
       // Encontrar o nó com o menor valor fScore na lista aberta
       openList.sort((a, b) => fScore[a.nome] - fScore[b.nome]);
       let currentNode = openList.shift();
@@ -288,8 +320,16 @@
         }
         return path;
       }
-  
       closedList.add(currentNode);
+      outputClosedList.push(currentNode.nome);
+      //removendo no fechado da lista de abertos
+      for(i = 0; i < outputOpenList.length; i++){
+        if(currentNode.nome == outputOpenList[i]){
+          outputOpenList.splice(i,1)
+        }
+      }
+      //removendo nó da lista de abertos
+
   
       // Expande apenas os vizinhos dos nós já presentes na lista de todos os nós possíveis
       for (const neighbor of allNodes[currentNode.nome].vizinhos) {
@@ -298,9 +338,14 @@
         }
   
         const tentativeGScore = gScore[currentNode.nome] + currentNode.custo[neighbor.nome];
+        neighbor.pai = currentNode.nome;
   
         if (!openList.includes(neighbor)) {
           openList.push(neighbor); // Adicionar vizinho à lista aberta se não estiver lá
+          outputOpenList.push(neighbor.nome)
+          console.log(`Nome:${neighbor.nome}  Heurística:${calcularDistancia(neighbor, goalNode)} Acumulado:${tentativeGScore}`)
+          console.log(`Pai: ${neighbor.pai}`)
+          buildTree(neighbor.nome,neighbor.pai,tentativeGScore)
         } else if (tentativeGScore >= gScore[neighbor.nome]) {
           continue; // Não é um caminho melhor
         }
