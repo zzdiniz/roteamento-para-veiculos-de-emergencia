@@ -222,6 +222,10 @@
     nodes[39].custo[nodes[10].nome] = 1.1 //Bonfim -> Círculo Militar
 
   function calcularDistancia(initialNode, objetivo) {//função heurística "h(n)", usada para compor a função de avaliação
+    /*if(initialNode.nome == "CPFL" || initialNode.nome == "Jockey" || initialNode.nome == "Catedral"){
+      //heuristica não admissível
+      return 9
+    }*/
     const raioTerra = 6371; // Raio médio da Terra em quilômetros
     const latitude = initialNode.latitude;
     const longitude = initialNode.longitude;
