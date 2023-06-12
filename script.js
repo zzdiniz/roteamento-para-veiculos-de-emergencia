@@ -246,11 +246,14 @@
 
   console.log(nodes)
   //////////////////////////////////////////////////////////////////////////////////////////////
-  function buildTree(nodeName,nodeFather,nodeCost){
+  function buildTree(nodeName,nodeFather,nodeCost,heurística){
     const node = document.createElement('div')
     const nameCell = document.createElement('div')
     const fatherCell = document.createElement('div')
     const costCell = document.createElement('div')
+    nameCell.className = "cell"
+    fatherCell.className = "cell"
+    costCell.className = "cell"
     nameCell.innerText = `${nodeName}`
     fatherCell.innerText = `${nodeFather}`
     costCell.innerText = `${nodeCost}`
@@ -264,19 +267,95 @@
       document.getElementById("tree").appendChild(node)
       const placeHolder = document.createElement('div')
       placeHolder.setAttribute('id',`placeHolder${nodeName}`)
+      placeHolder.setAttribute('class',`placeHolder`)
       node.insertAdjacentElement("afterend", placeHolder);
     }
     else{
       node.setAttribute('id',`${nodeName}`)
       const fatherPlaceHolder = document.getElementById(`placeHolder${nodeFather}`)
-      fatherPlaceHolder.appendChild(node)
       const nodePlaceHolder = document.createElement('div')
       nodePlaceHolder.setAttribute('id',`placeHolder${nodeName}`)
       nodePlaceHolder.setAttribute('class',`placeHolder`)
       node.insertAdjacentElement("afterend", nodePlaceHolder);
+      const wrapper = document.createElement('div')
+      wrapper.className = "wrapper"
+      wrapper.appendChild(node)
+      wrapper.appendChild(nodePlaceHolder)
+      fatherPlaceHolder.appendChild(wrapper)
+    }
+    if(heurística == 0){
+      node.classList.add("objetivo")
     }
   }
   //////////////////////////////////////////////////////////////////////////////////////////////
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  let rowNumber = 0
+  function buildOpenList(openList){
+    if(document.getElementById('row1') == null || document.getElementById('row1') == undefined){
+      const row1 = document.createElement('div')
+      row1.setAttribute('id','row1')
+      const span = document.createElement('span')
+      span.innerText = `${openList[0]}`
+      row1.appendChild(span)
+      document.getElementById("openList").appendChild(row1)
+      rowNumber++;
+    }
+    else{
+      const row = document.createElement('div')
+      row.setAttribute('id',`row${rowNumber+1}`)
+      for(i = 0; i < openList.length; i++){
+        let rowItem = document.createElement('span')
+        rowItem.innerText = `${openList[i]}, `
+        row.appendChild(rowItem)
+      }
+      document.getElementById("openList").appendChild(row)
+    }
+  }
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  let rowNumber2 = 0
+  function buildClosedList(closedList){
+    if(document.getElementById('row1Closed') == null || document.getElementById('row1Closed') == undefined){
+      const row1 = document.createElement('div')
+      row1.setAttribute('id','row1Closed')
+      const span = document.createElement('span')
+      span.innerText = `${closedList[0]}`
+      row1.appendChild(span)
+      document.getElementById("closedList").appendChild(row1)
+      rowNumber2++;
+    }
+    else{
+      const row = document.createElement('div')
+      row.setAttribute('id',`row${rowNumber2+1}Closed`)
+      for(i = 0; i < closedList.length; i++){
+        let rowItem = document.createElement('span')
+        rowItem.innerText = `${closedList[i]}, `
+        row.appendChild(rowItem)
+      }
+      document.getElementById("closedList").appendChild(row)
+    }
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////////////////////////////////////////////
+  function buildHeuristicsList(nodes, goalNode){
+    const list = document.getElementById("heuristicas")
+    for(i = 0; i < nodes.length; i++){
+      const row = document.createElement('div')
+      const name = document.createElement('span')
+      name.innerText = `${nodes[i].nome}`
+      name.className = "heuristicCell"
+      row.appendChild(name)
+      const heuristic = document.createElement('span')
+      heuristic.innerText = `${calcularDistancia(nodes[i],goalNode).toFixed(2)}`
+      heuristic.className = "heuristicCell"
+      row.appendChild(heuristic)
+      list.appendChild(row)
+      row.className = "heuristicRow"
+    }
+
+  }
+  //////////////////////////////////////////////////////////////////////////////////////////
   function convertToAllNodes(nodes) {
     const allNodes = {};
   
@@ -299,14 +378,17 @@
     const outputOpenList = []
     const outputClosedList = []
     // Inicialização
-    buildTree(startNode.nome,startNode.pai,startNode.custo)
+    buildTree(startNode.nome,startNode.pai,0,undefined)
     gScore[startNode.nome] = 0;
     fScore[startNode.nome] = calcularDistancia(startNode, goalNode);
     openList.push(startNode);
+    listOfLists = openList.map(node => node.nome)
     outputOpenList.push(startNode.nome)
     while (openList.length > 0) {
       console.log("lista de abertos ->",outputOpenList);
+      buildOpenList(outputOpenList)
       console.log("lista de fechados ->",outputClosedList);
+      buildClosedList(outputClosedList)
       // Encontrar o nó com o menor valor fScore na lista aberta
       openList.sort((a, b) => fScore[a.nome] - fScore[b.nome]);
       let currentNode = openList.shift();
@@ -345,7 +427,8 @@
           outputOpenList.push(neighbor.nome)
           console.log(`Nome:${neighbor.nome}  Heurística:${calcularDistancia(neighbor, goalNode)} Acumulado:${tentativeGScore}`)
           console.log(`Pai: ${neighbor.pai}`)
-          buildTree(neighbor.nome,neighbor.pai,tentativeGScore)
+          let fixedCost = (tentativeGScore + calcularDistancia(neighbor, goalNode))
+          buildTree(neighbor.nome,neighbor.pai,fixedCost.toFixed(2), calcularDistancia(neighbor, goalNode))
         } else if (tentativeGScore >= gScore[neighbor.nome]) {
           continue; // Não é um caminho melhor
         }
@@ -358,7 +441,22 @@
   
     return null; // Caminho não encontrado
   }
-
+  //////////////////////////////////////////////////////////////////////////
+  function printPath(nodes){
+    const lists = document.getElementById("path")
+    const path = document.createElement('div')
+    for(i = 0; i < nodes.length; i++){
+      const node = document.createElement('span')
+      node.innerText = `Em(${nodes[i].nome})-> `
+      path.appendChild(node)
+    }
+    lists.appendChild(path)
+  }
+  /////////////////////////////////////////////////////////////////////////
+//PUC 1 = node[13]
+//jockey club = node[19]
   const allNodes = convertToAllNodes(nodes)
-  const resultado = estrela(nodes[13],nodes[19],allNodes);
+  const resultado = estrela(nodes[13],objetivo,allNodes);
+  buildHeuristicsList(nodes, objetivo)
   console.log("resultado ->", resultado)
+  printPath(resultado)
