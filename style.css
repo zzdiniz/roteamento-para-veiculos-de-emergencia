@@ -1,0 +1,45 @@
+.tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.node {
+    padding: 5px;
+    margin: 10px 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+} 
+.placeHolder{
+    display: flex;
+    justify-content: center;
+}
+.cell{
+    border: 1px solid black;
+    padding: 10px;
+}
+.objetivo{
+    background-color: red;
+    padding: 0;
+    color: white;
+    margin-top: 10px;
+}
+#lists{
+    display: flex;
+    justify-content: start;
+}
+#openList{
+    margin-right: 10px;
+}
+#openList,#closedList{
+    padding: 5px;
+    border: 1px solid black;
+}
+.heuristicCell{
+    padding: 5px;
+    border: 1px solid black;
+}
+.heuristicRow{
+    padding: 10px;
+}
